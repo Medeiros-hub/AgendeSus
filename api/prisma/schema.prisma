@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  CITIZEN
+  RECEPTIONIST
+  ADMIN
+}
+
+enum SchedulingStatus {
+  SCHEDULED
+  CONFIRMED
+  CANCELLED
+  ATTENDED
+  MISSED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  cpf       String   @unique
+  fullName  String
+  birthDate DateTime
+  phone     String
+  email     String?  @unique
+  password  String?
+  type      UserType @default(CITIZEN)
+  zipcode   String?
+  address   String?
+  createdAt DateTime @default(now())
+
+  schedulings   Scheduling[]
+  SchedulingLog SchedulingLog[]
+}
+
+model Scheduling {
+  id              String           @id @default(uuid())
+  availableTimeId String           @unique
+  userId          String
+  status          SchedulingStatus @default(SCHEDULED)
+  scheduledAt     DateTime         @default(now())
+  confirmCode     String           @unique
+
+  availableTime AvailableTime   @relation(fields: [availableTimeId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id])
+  SchedulingLog SchedulingLog[]
+
+  @@map("schedulings")
+}
+
+model AvailableTime {
+  id                   String   @id @default(uuid())
+  date                 DateTime
+  startTime            DateTime
+  endTime              DateTime
+  available            Boolean  @default(true)
+  healthProfessionalId String
+  ubsId                String
+  serviceId            String
+
+  healthProfessional HealthProfessional @relation(fields: [healthProfessionalId], references: [id])
+  ubs                UBS                @relation(fields: [ubsId], references: [id])
+  service            Service            @relation(fields: [serviceId], references: [id])
+  scheduling         Scheduling?
+
+  @@map("available_times")
+}
+
+model HealthProfessional {
+  id        String @id @default(uuid())
+  name      String
+  specialty String
+  crm       String @unique
+  ubsId     String
+
+  ubs            UBS             @relation(fields: [ubsId], references: [id])
+  availableTimes AvailableTime[]
+
+  @@map("health_professionals")
+}
+
+model UBS {
+  id        String   @id @default(uuid())
+  name      String
+  cep       String
+  address   String
+  phone     String
+  createdAt DateTime @default(now())
+
+  healthProfessionals HealthProfessional[]
+  availableTimes      AvailableTime[]
+
+  @@map("ubs")
+}
+
+model Service {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  description     String?
+  durationMinutes Int      @default(30)
+  createdAt       DateTime @default(now())
+
+  availableTimes AvailableTime[]
+
+  @@map("services")
+}
+
+model SchedulingLog {
+  id           String   @id @default(uuid())
+  schedulingId String
+  action       String
+  oldData      Json?
+  newData      Json?
+  userId       String
+  createdAt    DateTime @default(now())
+
+  scheduling Scheduling @relation(fields: [schedulingId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@map("scheduling_logs")
+}

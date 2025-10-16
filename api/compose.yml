@@ -1,0 +1,40 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: AgendeSus
+    entrypoint: sh -c "pnpm install && pnpm start:dev"
+    depends_on:
+      - db
+    networks:
+      - api-network
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    
+  db: 
+    image: postgres:latest
+    container_name: AgendeSus-DB
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - api-network
+
+networks:
+  api-network:
+
+volumes:
+  db-data:
