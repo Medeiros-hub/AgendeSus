@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '../../../generated/prisma';
 import { CreateUserDto } from './application/dtos/create-user.dto';
 import { UpdateUserDto } from './application/dtos/update-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { DatabaseService } from '@/core/infra/database/database.service';
 
 @Injectable()
 export class UserService {
-  private prisma = new PrismaClient();
+  constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const existingUserByCpf = await this.prisma.user.findUnique({
+    const existingUserByCpf = await this.databaseService.user.findUnique({
       where: { cpf: createUserDto.cpf },
     });
 
@@ -18,7 +18,7 @@ export class UserService {
     }
 
     if (createUserDto.email) {
-      const existingUserByEmail = await this.prisma.user.findUnique({
+      const existingUserByEmail = await this.databaseService.user.findUnique({
         where: { email: createUserDto.email },
       });
 
@@ -29,7 +29,7 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    const user = await this.prisma.user.create({
+    const user = await this.databaseService.user.create({
       data: {
         cpf: createUserDto.cpf,
         fullName: createUserDto.fullName,
@@ -48,7 +48,7 @@ export class UserService {
   }
 
   async findAll() {
-    const users = await this.prisma.user.findMany({
+    const users = await this.databaseService.user.findMany({
       select: {
         id: true,
         cpf: true,
@@ -66,7 +66,7 @@ export class UserService {
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.databaseService.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -85,14 +85,14 @@ export class UserService {
   }
 
   async findByCpf(cpf: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.databaseService.user.findUnique({
       where: { cpf },
     });
     return user;
   }
 
   async findByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.databaseService.user.findUnique({
       where: { email },
     });
     return user;
@@ -101,7 +101,7 @@ export class UserService {
   async update(id: string, updateUserDto: UpdateUserDto) {
     const data: any = { ...updateUserDto };
 
-    const user = await this.prisma.user.update({
+    const user = await this.databaseService.user.update({
       where: { id },
       data,
       select: {
@@ -122,7 +122,7 @@ export class UserService {
   }
 
   async remove(id: string) {
-    await this.prisma.user.delete({
+    await this.databaseService.user.delete({
       where: { id },
     });
   }
