@@ -52,7 +52,7 @@ export class CreateUserUseCase
     }
 
     if (request.password) {
-      const hashedPassword = await bcrypt.hash(request.password, 10);
+      const hashedPassword = await bcrypt.hash(request.password, 12);
       user.setPassword(hashedPassword);
     }
 

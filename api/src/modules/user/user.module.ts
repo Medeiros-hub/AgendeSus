@@ -5,6 +5,7 @@ import { GetUserByIdUseCase } from './application/use-cases/get-user-by-id.use-c
 import { GetAllUsersUseCase } from './application/use-cases/get-all-users.use-case';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
+import { USER_REPOSITORY_TOKEN } from './user.tokens';
 
 @Module({
   imports: [],
@@ -14,6 +15,10 @@ import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.
     GetUserByIdUseCase,
     GetAllUsersUseCase,
     UpdateUserUseCase,
+    {
+      provide: USER_REPOSITORY_TOKEN,
+      useClass: PrismaUserRepository,
+    },
     PrismaUserRepository,
   ],
   exports: [
@@ -21,6 +26,7 @@ import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.
     GetUserByIdUseCase,
     GetAllUsersUseCase,
     UpdateUserUseCase,
+    USER_REPOSITORY_TOKEN,
     PrismaUserRepository,
   ],
 })

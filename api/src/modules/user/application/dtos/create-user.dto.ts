@@ -47,43 +47,38 @@ export class CreateUserDto {
     description: 'Email do usuário',
     example: 'joao@email.com',
   })
-  @IsOptional()
   @IsEmail({}, { message: 'Email deve ter um formato válido' })
-  email?: string;
+  email: string;
 
   @ApiPropertyOptional({
     description: 'Senha do usuário',
     example: 'senha123',
   })
-  @IsOptional()
   @IsString()
   @Length(6, 100, { message: 'Senha deve ter entre 6 e 100 caracteres' })
-  password?: string;
+  password: string;
 
   @ApiPropertyOptional({
     description: 'Tipo do usuário',
     enum: UserType,
     example: UserType.CITIZEN,
   })
-  @IsOptional()
   @IsEnum(UserType, { message: 'Tipo de usuário inválido' })
-  type?: UserType;
+  type: UserType;
 
   @ApiPropertyOptional({
     description: 'CEP do usuário',
     example: '12345678',
   })
-  @IsOptional()
   @IsString()
   @Matches(/^\d{8}$/, { message: 'CEP deve ter exatamente 8 dígitos' })
-  zipcode?: string;
+  zipcode: string;
 
   @ApiPropertyOptional({
     description: 'Endereço completo do usuário',
     example: 'Rua das Flores, 123, Centro',
   })
-  @IsOptional()
   @IsString()
   @Length(5, 500, { message: 'Endereço deve ter entre 5 e 500 caracteres' })
-  address?: string;
+  address: string;
 }

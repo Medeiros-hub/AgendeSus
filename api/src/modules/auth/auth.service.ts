@@ -1,9 +1,10 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IUserRepository } from '../user/domain/repositories/user-repository.interface';
 import { USER_REPOSITORY_TOKEN } from '../user/user.tokens';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../user/domain/entities/user.entity';
+import { ApiResponse as ApiResponseDto } from '@/shared/dtos/api-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,16 +24,22 @@ export class AuthService {
     }
 
     if (!user || !user.password) {
-      return null;
+      throw new HttpException(
+        ApiResponseDto.error('Credenciais inválidas'),
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return null;
+      throw new HttpException(
+        ApiResponseDto.error('Credenciais inválidas'),
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     const { password: _, ...result } = user.toPlainObject();
-    return result;
+    return this.login(result);
   }
 
   async login(user: any) {

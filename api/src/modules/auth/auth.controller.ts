@@ -2,19 +2,18 @@ import {
   Controller,
   Post,
   Body,
-  UseGuards,
-  Request,
   HttpStatus,
   HttpException,
+  Res,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserUseCase } from '../user/application/use-cases/create-user.use-case';
-import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LoginDto, LoginResponseDto } from './dtos/login.dto';
 import { CreateUserDto } from '../user/application/dtos/create-user.dto';
 import { UserResponseDto } from '../user/application/dtos/user-response.dto';
 import { ApiResponse as ApiResponseDto } from '../../shared/dtos/api-response.dto';
+import { Response } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -70,7 +69,6 @@ export class AuthController {
     }
   }
 
-  @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOperation({ summary: 'Fazer login no sistema' })
   @ApiResponse({
@@ -83,20 +81,42 @@ export class AuthController {
     description: 'Credenciais inválidas',
   })
   async login(
+    @Res({ passthrough: true }) response: Response,
     @Body() loginDto: LoginDto,
-    @Request() req: any,
   ): Promise<ApiResponseDto<LoginResponseDto>> {
     try {
-      const loginResponse = await this.authService.login(req.user);
+      const loginResponse = await this.authService.validateUser(
+        loginDto.identifier,
+        loginDto.password,
+      );
+
+      response.cookie('userToken', loginResponse.access_token, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+      });
+
       return ApiResponseDto.success(
         'Login realizado com sucesso',
         loginResponse,
       );
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
         ApiResponseDto.error('Erro no login'),
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('userToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    return ApiResponseDto.success('Logout realizado com sucesso', null);
   }
 }

@@ -10,11 +10,11 @@ export interface UserProps {
   fullName: string;
   birthDate: Date;
   phone: string;
-  email?: string;
+  email: string;
   password?: string;
   type: UserType;
-  zipcode?: string;
-  address?: string;
+  zipcode: string;
+  address: string;
   createdAt?: Date;
 }
 
@@ -24,11 +24,11 @@ export class User {
   private _fullName: string;
   private _birthDate: Date;
   private _phone: string;
-  private _email?: string;
+  private _email: string;
   private _password?: string;
   private _type: UserType;
-  private _zipcode?: string;
-  private _address?: string;
+  private _zipcode: string;
+  private _address: string;
   private _createdAt?: Date;
 
   constructor(props: UserProps) {
@@ -65,11 +65,11 @@ export class User {
     return this._phone;
   }
 
-  get email(): string | undefined {
+  get email(): string {
     return this._email;
   }
 
-  get password(): string | undefined {
+  get password(): string {
     return this._password;
   }
 
@@ -77,11 +77,11 @@ export class User {
     return this._type;
   }
 
-  get zipcode(): string | undefined {
+  get zipcode(): string {
     return this._zipcode;
   }
 
-  get address(): string | undefined {
+  get address(): string {
     return this._address;
   }
 
@@ -91,10 +91,6 @@ export class User {
 
   setPassword(password: string): void {
     this._password = password;
-  }
-
-  setEmail(email: string): void {
-    this._email = email;
   }
 
   updateProfile(data: Partial<UserProps>): void {
