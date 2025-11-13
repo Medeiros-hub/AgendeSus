@@ -10,7 +10,7 @@ export const swaggerConfig = (app: NestExpressApplication): void => {
     .setVersion('1.0')
     .addTag('auth', 'Endpoints de autenticação e registro')
     .addTag('users', 'Gerenciamento de usuários')
-    .addBearerAuth()
+    .addCookieAuth()
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

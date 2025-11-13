@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -28,11 +27,11 @@ model User {
   fullName  String
   birthDate DateTime
   phone     String
-  email     String?  @unique
-  password  String?
+  email     String   @unique
+  password  String
   type      UserType @default(CITIZEN)
-  zipcode   String?
-  address   String?
+  zipcode   String
+  address   String
   createdAt DateTime @default(now())
 
   schedulings   Scheduling[]

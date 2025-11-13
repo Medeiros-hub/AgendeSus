@@ -1,0 +1,1143 @@
+{
+  "info": {
+    "name": "AgendeSus API",
+    "description": "Collection completa da API AgendeSus - Sistema de agendamento de consultas médicas do SUS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "agendesus-api-v1",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3333",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ubsId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "serviceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "professionalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "availableTimeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "schedulingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "confirmCode",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login com Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Extrai o cookie auth_token e salva como variável",
+                  "const cookies = pm.cookies.toObject();",
+                  "if (cookies.auth_token) {",
+                  "    pm.collectionVariables.set('authToken', cookies.auth_token);",
+                  "    console.log('Token salvo:', cookies.auth_token);",
+                  "}",
+                  "",
+                  "// Salva dados do usuário",
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('userId', jsonData.user.id);",
+                  "    console.log('User ID:', jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"joao@example.com\",\n  \"password\": \"SenhaSegura123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Faz login usando email e retorna cookie HTTP-only com JWT"
+          },
+          "response": []
+        },
+        {
+          "name": "Login com CPF",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Extrai o cookie auth_token e salva como variável",
+                  "const cookies = pm.cookies.toObject();",
+                  "if (cookies.auth_token) {",
+                  "    pm.collectionVariables.set('authToken', cookies.auth_token);",
+                  "    console.log('Token salvo:', cookies.auth_token);",
+                  "}",
+                  "",
+                  "// Salva dados do usuário",
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('userId', jsonData.user.id);",
+                  "    console.log('User ID:', jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"12345678901\",\n  \"password\": \"SenhaSegura123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Faz login usando CPF (com ou sem formatação) e retorna cookie HTTP-only com JWT"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Limpa o cookie de autenticação"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de autenticação"
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Criar Usuário (Cidadão)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('userId', jsonData.id);",
+                  "    console.log('Usuário criado com ID:', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cpf\": \"12345678901\",\n  \"fullName\": \"João da Silva\",\n  \"birthDate\": \"1990-01-01\",\n  \"phone\": \"11987654321\",\n  \"email\": \"joao@example.com\",\n  \"password\": \"SenhaSegura123\",\n  \"type\": \"CITIZEN\",\n  \"zipcode\": \"01310-100\",\n  \"address\": \"Av. Paulista, 1000, São Paulo - SP\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Cria um novo usuário cidadão (rota pública)"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Usuário Admin",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cpf\": \"98765432100\",\n  \"fullName\": \"Admin Sistema\",\n  \"birthDate\": \"1985-05-15\",\n  \"phone\": \"11999887766\",\n  \"email\": \"admin@agendesus.com\",\n  \"password\": \"AdminSeguro123\",\n  \"type\": \"ADMIN\",\n  \"zipcode\": \"01310-100\",\n  \"address\": \"Rua Admin, 123, São Paulo - SP\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Cria um usuário administrador"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Recepcionista",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cpf\": \"11122233344\",\n  \"fullName\": \"Maria Recepcionista\",\n  \"birthDate\": \"1992-08-20\",\n  \"phone\": \"11988776655\",\n  \"email\": \"maria@agendesus.com\",\n  \"password\": \"MariaSenha123\",\n  \"type\": \"RECEPTIONIST\",\n  \"zipcode\": \"01310-200\",\n  \"address\": \"Rua Recepção, 456, São Paulo - SP\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Cria um usuário recepcionista"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Meu Perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            },
+            "description": "Retorna o perfil do usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Usuário por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Busca usuário por ID (Admin/Recepcionista)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Usuários",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lista usuários (paginação)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Usuário",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Deleta usuário por ID (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Usuário",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"João da Silva Atualizado\",\n  \"phone\": \"11999998888\",\n  \"address\": \"Av. Paulista, 2000, São Paulo - SP\",\n  \"zipcode\": \"01310-200\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Atualiza dados do usuário"
+          },
+          "response": []
+        }
+      ],
+      "description": "Gestão de usuários"
+    },
+    {
+      "name": "UBS",
+      "item": [
+        {
+          "name": "Criar UBS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('ubsId', jsonData.id);",
+                  "    console.log('UBS criada com ID:', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UBS Centro\",\n  \"cep\": \"01310-100\",\n  \"address\": \"Av. Paulista, 1000, São Paulo - SP\",\n  \"phone\": \"11 3456-7890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ubs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ubs"
+              ]
+            },
+            "description": "Cria uma nova UBS (requer role ADMIN)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar UBS",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ubs?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ubs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lista UBSs (paginação)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar UBS",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ubs/{{ubsId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ubs",
+                "{{ubsId}}"
+              ]
+            },
+            "description": "Deleta UBS por ID (Admin)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Gestão de Unidades Básicas de Saúde"
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "Criar Serviço",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('serviceId', jsonData.id);",
+                  "    console.log('Serviço criado com ID:', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Consulta Clínica Geral\",\n  \"description\": \"Consulta com médico clínico geral para avaliação e diagnóstico\",\n  \"durationMinutes\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services"
+              ]
+            },
+            "description": "Cria um novo serviço médico (requer role ADMIN)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Serviços",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/services?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lista serviços (paginação)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Serviço",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services",
+                "{{serviceId}}"
+              ]
+            },
+            "description": "Deleta serviço por ID (Admin)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Gestão de serviços médicos"
+    },
+    {
+      "name": "Health Professionals",
+      "item": [
+        {
+          "name": "Criar Profissional de Saúde",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('professionalId', jsonData.id);",
+                  "    console.log('Profissional criado com ID:', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Carlos Pereira\",\n  \"specialty\": \"Clínico Geral\",\n  \"crm\": \"123456-SP\",\n  \"ubsId\": \"{{ubsId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/health-professionals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health-professionals"
+              ]
+            },
+            "description": "Cria um profissional de saúde (requer role ADMIN)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Profissionais",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health-professionals?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health-professionals"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lista profissionais de saúde (paginação)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Profissional",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health-professionals/{{professionalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health-professionals",
+                "{{professionalId}}"
+              ]
+            },
+            "description": "Deleta profissional por ID (Admin)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Gestão de profissionais de saúde"
+    },
+    {
+      "name": "Available Times",
+      "item": [
+        {
+          "name": "Criar Horário Disponível",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('availableTimeId', jsonData.id);",
+                  "    console.log('Horário criado com ID:', jsonData.id);",
+                  "}",
+                  "",
+                  "// Gera horários para os próximos 7 dias",
+                  "// Use o Pre-request Script para gerar datas dinâmicas"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Gera data para daqui a 7 dias",
+                  "const futureDate = new Date();",
+                  "futureDate.setDate(futureDate.getDate() + 7);",
+                  "",
+                  "// Horário de início: 8h da manhã",
+                  "const startTime = new Date(futureDate);",
+                  "startTime.setHours(8, 0, 0, 0);",
+                  "",
+                  "// Horário de fim: 8h30 da manhã",
+                  "const endTime = new Date(futureDate);",
+                  "endTime.setHours(8, 30, 0, 0);",
+                  "",
+                  "pm.collectionVariables.set('futureDate', futureDate.toISOString());",
+                  "pm.collectionVariables.set('startTime', startTime.toISOString());",
+                  "pm.collectionVariables.set('endTime', endTime.toISOString());"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{futureDate}}\",\n  \"startTime\": \"{{startTime}}\",\n  \"endTime\": \"{{endTime}}\",\n  \"healthProfessionalId\": \"{{professionalId}}\",\n  \"ubsId\": \"{{ubsId}}\",\n  \"serviceId\": \"{{serviceId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/available-times",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "available-times"
+              ]
+            },
+            "description": "Cria um horário disponível (requer role ADMIN ou RECEPTIONIST)"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Horários Disponíveis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/available-times?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "available-times"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "ubsId",
+                  "value": "{{ubsId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "serviceId",
+                  "value": "{{serviceId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "healthProfessionalId",
+                  "value": "{{professionalId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2025-01-10T00:00:00.000Z",
+                  "disabled": true
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2025-01-20T00:00:00.000Z",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Busca horários disponíveis com filtros opcionais"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Horários por UBS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/available-times?ubsId={{ubsId}}&page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "available-times"
+              ],
+              "query": [
+                {
+                  "key": "ubsId",
+                  "value": "{{ubsId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Filtra horários por UBS específica"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Horário Disponível",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/available-times/{{availableTimeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "available-times",
+                "{{availableTimeId}}"
+              ]
+            },
+            "description": "Deleta horário disponível por ID (Admin/Recepcionist)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Gestão de horários disponíveis"
+    },
+    {
+      "name": "Schedulings",
+      "item": [
+        {
+          "name": "Criar Agendamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('schedulingId', jsonData.id);",
+                  "    pm.collectionVariables.set('confirmCode', jsonData.confirmCode);",
+                  "    console.log('Agendamento criado com ID:', jsonData.id);",
+                  "    console.log('Código de confirmação:', jsonData.confirmCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"availableTimeId\": \"{{availableTimeId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedulings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedulings"
+              ]
+            },
+            "description": "Cria um agendamento para o usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Confirmar Agendamento",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmCode\": \"{{confirmCode}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedulings/{{schedulingId}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedulings",
+                "{{schedulingId}}",
+                "confirm"
+              ]
+            },
+            "description": "Confirma o agendamento com código de 6 dígitos"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar Agendamento",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/schedulings/{{schedulingId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedulings",
+                "{{schedulingId}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancela o agendamento (mínimo 2h de antecedência)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Agendamentos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/schedulings?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedulings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "userId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista agendamentos (paginação, filtros opcionais)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Agendamento",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/schedulings/{{schedulingId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedulings",
+                "{{schedulingId}}"
+              ]
+            },
+            "description": "Deleta agendamento por ID (Admin/Recepção)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Gestão de agendamentos"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Script global executado antes de cada requisição",
+          "// Pode adicionar lógica de refresh token aqui no futuro"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Script global executado após cada requisição",
+          "// Logs úteis para debugging",
+          "console.log('Status:', pm.response.code);",
+          "console.log('Time:', pm.response.responseTime + 'ms');"
+        ]
+      }
+    }
+  ]
+}
