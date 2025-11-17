@@ -1,8 +1,8 @@
 export class AvailableTimeResponseDto {
   id: string;
-  date: Date;
-  startTime: Date;
-  endTime: Date;
+  date: string;
+  startTime: string;
+  endTime: string;
   available: boolean;
   healthProfessionalId: string;
   ubsId: string;

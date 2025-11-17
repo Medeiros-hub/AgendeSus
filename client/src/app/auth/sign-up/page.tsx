@@ -1,7 +1,6 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { motion } from 'framer-motion';
 import { MapPin, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -24,7 +23,7 @@ import {
 import { useRequestApi } from '@/hooks/use-request-api';
 import { auth } from '@/services/internal-api/auth';
 import { EUserType } from '@/services/internal-api/types/auth';
-import { SignUpFormData, signUpSchema } from '@/validations/sign-up-schema';
+import { signUpSchema, TSignUpFormSchema } from '@/validations/sign-up-schema';
 
 export default function CadastroPaciente() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -36,7 +35,7 @@ export default function CadastroPaciente() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpFormData>({
+  } = useForm<TSignUpFormSchema>({
     resolver: zodResolver(signUpSchema),
   });
 
@@ -53,7 +52,7 @@ export default function CadastroPaciente() {
     },
   );
 
-  const handleSubmitForm = (data: SignUpFormData) => {
+  const handleSubmitForm = (data: TSignUpFormSchema) => {
     registerUserHandler({
       ...data,
       type: EUserType.CITIZEN,

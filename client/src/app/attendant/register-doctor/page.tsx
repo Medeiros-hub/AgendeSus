@@ -4,7 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { Stethoscope } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Controller,useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
@@ -19,6 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRequestApi } from '@/hooks/use-request-api';
+import { healthProfessionals } from '@/services/internal-api';
+import { services } from '@/services/internal-api/services';
+import { ubs } from '@/services/internal-api/ubs';
 import {
   RegisterDoctorSchema,
   registerDoctorSchema,
@@ -38,10 +44,38 @@ export default function RegisterDoctorPage() {
     resolver: zodResolver(registerDoctorSchema),
   });
 
+  const { handler: createProfessional, isLoading: isCreating } = useRequestApi(
+    healthProfessionals.createHealthProfessional,
+    {
+      onSuccess() {
+        toast.success('Médico cadastrado com sucesso!');
+        router.push('/attendant/dashboard');
+      },
+      onError(error) {
+        toast.error(error.message || 'Erro ao cadastrar médico');
+      },
+    },
+  );
+
+  const { data: servicesData, handler: servicesHandler } = useRequestApi(
+    services.getServices,
+  );
+
+  const { data: ubsData, handler: ubsHandler } = useRequestApi(ubs.getUBSList);
+
+  useEffect(() => {
+    servicesHandler({ limit: 1000, page: 1 });
+    ubsHandler({ limit: 1000, page: 1 });
+  }, []);
+
   const handleSubmitForm = (data: RegisterDoctorSchema) => {
-    console.log('Cadastro Médico:', data);
-    alert('Médico cadastrado com sucesso!');
-    router.push('/attendant/dashboard');
+    createProfessional({
+      name: data.fullName,
+      specialty: data.specialty,
+      crm: data.crm,
+      ubsId: data.ubsId,
+      serviceId: data.serviceId,
+    });
   };
 
   const selectedSpecialty = watch('specialty');
@@ -161,6 +195,72 @@ export default function RegisterDoctorPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
+                    <Label htmlFor="ubsId">UBS *</Label>
+                    <Controller
+                      control={control}
+                      name="ubsId"
+                      rules={{ required: 'Selecione uma UBS' }}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Selecione a UBS" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ubsData?.ubsList.map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                {u.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.ubsId && (
+                      <p className="text-sm text-red-600">
+                        {errors.ubsId.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="serviceId">Serviço</Label>
+                    <Controller
+                      control={control}
+                      name="serviceId"
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Selecione o serviço" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {servicesData?.services.map((service) => (
+                              <SelectItem
+                                key={service.props.id}
+                                value={service.props.id}
+                              >
+                                {service.props.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.serviceId && (
+                      <p className="text-sm text-red-600">
+                        {errors.serviceId.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                     <Label htmlFor="phone">Telefone *</Label>
                     <Input
                       id="phone"
@@ -251,14 +351,16 @@ export default function RegisterDoctorPage() {
                     variant="outline"
                     className="flex-1"
                     onClick={() => router.push('/attendant/dashboard')}
+                    disabled={isCreating}
                   >
                     Cancelar
                   </Button>
                   <Button
                     type="submit"
                     className="flex-1 bg-slate-600 hover:bg-slate-700 text-white"
+                    disabled={isCreating}
                   >
-                    Cadastrar Médico
+                    {isCreating ? 'Cadastrando...' : 'Cadastrar Médico'}
                   </Button>
                 </div>
               </form>

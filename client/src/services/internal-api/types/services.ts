@@ -6,11 +6,13 @@ export type TGetServicesParams = {
 
 export type TGetServicesResponse = {
   services: {
-    id: string;
-    name: string;
-    description: string | null;
-    durationMinutes: number;
-    createdAt: string;
+    props: {
+      id: string;
+      name: string;
+      description: string | null;
+      durationMinutes: number;
+      createdAt: string;
+    };
   }[];
   total: number;
 };

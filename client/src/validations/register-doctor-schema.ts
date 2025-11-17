@@ -11,6 +11,8 @@ export const registerDoctorSchema = z
       .min(3, 'O CRM deve ter ao menos 3 caracteres')
       .max(20, 'O CRM é muito longo'),
     specialty: z.string().nonempty('Selecione uma especialidade'),
+    ubsId: z.string().nonempty('Selecione uma UBS'),
+    serviceId: z.string().optional(),
     phone: z
       .string()
       .min(8, 'Telefone inválido')

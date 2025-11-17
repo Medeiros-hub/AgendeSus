@@ -44,10 +44,11 @@ export function useRequestApi<
     try {
       requestController.current = new AbortController();
       const response = await apiFunction(params, options);
+
       setData(response);
       onSuccess && onSuccess(response);
     } catch (error: any) {
-      console.error('useRequestApi error:', error.response.data.message);
+      console.error('useRequestApi error:', error.response);
       if (error.name === 'CanceledError') return error;
 
       const err: IUseRequestApiError = {

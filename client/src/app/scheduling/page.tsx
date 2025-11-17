@@ -1,15 +1,27 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 
 import AppointmentForm from '@/components/AppointmentForm';
 import ExameCard from '@/components/ExameCard';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import InfoCard from '@/components/InfoCard';
+import { useRequestApi } from '@/hooks/use-request-api';
+import { services } from '@/services/internal-api/services';
 
 export default function SchedulingPage() {
-  const exames = ['Dentista', 'Medico Ocupanista', 'Prevenção'];
+  const { data: servicesData, handler: servicesHandler } = useRequestApi(
+    services.getServices,
+  );
+
+  useEffect(() => {
+    servicesHandler({
+      limit: 10,
+      page: 1,
+    });
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -62,8 +74,12 @@ export default function SchedulingPage() {
             </motion.h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {exames.map((exame, index) => (
-                <ExameCard key={exame} title={exame} delay={index * 0.1} />
+              {servicesData?.services.map((service, idx) => (
+                <ExameCard
+                  key={service.props.id}
+                  title={service.props.name}
+                  delay={idx * 0.1}
+                />
               ))}
             </div>
           </div>

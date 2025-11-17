@@ -10,13 +10,16 @@ export type TLoginUserParams = {
 };
 
 export type TLoginUserResponse = {
-  user: {
-    id: string;
-    email: string;
-    fullName: string;
-    type: EUserType;
-  };
-  expiresIn: string;
+  id: string;
+  cpf: string;
+  fullName: string;
+  birthDate: string;
+  phone: string;
+  email: string;
+  type: string;
+  zipcode: string;
+  address: string;
+  createdAt: string;
 };
 
 export type TRegisterUserParams = {

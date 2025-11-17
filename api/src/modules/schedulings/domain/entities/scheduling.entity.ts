@@ -147,7 +147,6 @@ export class Scheduling extends BaseEntity {
       status: this.props.status,
       scheduledAt: this.props.scheduledAt,
       confirmCode: this.props.confirmCode,
-      createdAt: this.createdAt,
     };
   }
 }

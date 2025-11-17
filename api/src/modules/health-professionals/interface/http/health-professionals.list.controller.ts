@@ -5,6 +5,7 @@ import {
   UseGuards,
   DefaultValuePipe,
   ParseIntPipe,
+  Param,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../../shared/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../shared/guards/roles.guard';
@@ -24,5 +25,15 @@ export class HealthProfessionalsListController {
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
   ) {
     return this.findUseCase.execute({ page, limit });
+  }
+
+  @Get('by-service/:serviceId')
+  @Roles(UserType.ADMIN, UserType.RECEPTIONIST, UserType.CITIZEN)
+  async findByService(@Param('serviceId') serviceId: string) {
+    return this.findUseCase.execute({
+      page: 1,
+      limit: 1000,
+      serviceId,
+    });
   }
 }

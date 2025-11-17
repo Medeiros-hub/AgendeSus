@@ -35,6 +35,15 @@ export class AvailableTimePrismaRepository implements IAvailableTimeRepository {
   ): Promise<{ times: AvailableTime[]; total: number }> {
     const skip = (page - 1) * limit;
 
+    // Construir filtro de data corretamente
+    const dateFilter: any = {};
+    if (filters.dateFrom) {
+      dateFilter.gte = filters.dateFrom;
+    }
+    if (filters.dateTo) {
+      dateFilter.lte = filters.dateTo;
+    }
+
     const where: Prisma.AvailableTimeWhereInput = {
       ...(filters.ubsId && { ubsId: filters.ubsId }),
       ...(filters.serviceId && { serviceId: filters.serviceId }),
@@ -42,8 +51,7 @@ export class AvailableTimePrismaRepository implements IAvailableTimeRepository {
         healthProfessionalId: filters.healthProfessionalId,
       }),
       ...(filters.available !== undefined && { available: filters.available }),
-      ...(filters.dateFrom && { date: { gte: filters.dateFrom } }),
-      ...(filters.dateTo && { date: { lte: filters.dateTo } }),
+      ...(Object.keys(dateFilter).length > 0 && { date: dateFilter }),
     };
 
     const [times, total] = await Promise.all([
@@ -75,12 +83,87 @@ export class AvailableTimePrismaRepository implements IAvailableTimeRepository {
     await this.prisma.availableTime.delete({ where: { id } });
   }
 
+  async findConflicts(
+    healthProfessionalId: string,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<AvailableTime[]> {
+    // Busca horários do mesmo profissional que se sobrepõem ao período informado
+    const conflicts = await this.prisma.availableTime.findMany({
+      where: {
+        healthProfessionalId,
+        OR: [
+          // Caso 1: Horário existente começa durante o novo período
+          {
+            AND: [
+              { startTime: { gte: startTime } },
+              { startTime: { lt: endTime } },
+            ],
+          },
+          // Caso 2: Horário existente termina durante o novo período
+          {
+            AND: [
+              { endTime: { gt: startTime } },
+              { endTime: { lte: endTime } },
+            ],
+          },
+          // Caso 3: Horário existente engloba completamente o novo período
+          {
+            AND: [
+              { startTime: { lte: startTime } },
+              { endTime: { gte: endTime } },
+            ],
+          },
+        ],
+      },
+    });
+
+    return conflicts.map(this.toDomain);
+  }
+
   private toDomain(prismaTime: PrismaAvailableTime): AvailableTime {
+    // Garantir que as datas sejam interpretadas como UTC
+    const date = new Date(
+      Date.UTC(
+        prismaTime.date.getUTCFullYear(),
+        prismaTime.date.getUTCMonth(),
+        prismaTime.date.getUTCDate(),
+        0,
+        0,
+        0,
+        0,
+      ),
+    );
+
+    const startTime = new Date(
+      Date.UTC(
+        prismaTime.startTime.getUTCFullYear(),
+        prismaTime.startTime.getUTCMonth(),
+        prismaTime.startTime.getUTCDate(),
+        prismaTime.startTime.getUTCHours(),
+        prismaTime.startTime.getUTCMinutes(),
+        0,
+        0,
+      ),
+    );
+
+    const endTime = new Date(
+      Date.UTC(
+        prismaTime.endTime.getUTCFullYear(),
+        prismaTime.endTime.getUTCMonth(),
+        prismaTime.endTime.getUTCDate(),
+        prismaTime.endTime.getUTCHours(),
+        prismaTime.endTime.getUTCMinutes(),
+        0,
+        0,
+      ),
+    );
+
     return new AvailableTime({
       id: prismaTime.id,
-      date: prismaTime.date,
-      startTime: prismaTime.startTime,
-      endTime: prismaTime.endTime,
+      date,
+      startTime,
+      endTime,
       available: prismaTime.available,
       healthProfessionalId: prismaTime.healthProfessionalId,
       ubsId: prismaTime.ubsId,

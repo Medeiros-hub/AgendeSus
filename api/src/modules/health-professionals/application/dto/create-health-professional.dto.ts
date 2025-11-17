@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsOptional } from 'class-validator';
 
 export class CreateHealthProfessionalDto {
   @IsString()
@@ -16,4 +16,8 @@ export class CreateHealthProfessionalDto {
   @IsUUID('4', { message: 'ID da UBS inválido' })
   @IsNotEmpty({ message: 'ID da UBS é obrigatório' })
   ubsId: string;
+
+  @IsUUID('4', { message: 'ID do Serviço inválido' })
+  @IsOptional()
+  serviceId?: string;
 }

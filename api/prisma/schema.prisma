@@ -80,6 +80,8 @@ model HealthProfessional {
 
   ubs            UBS             @relation(fields: [ubsId], references: [id])
   availableTimes AvailableTime[]
+  service        Service?        @relation(fields: [serviceId], references: [id])
+  serviceId      String?
 
   @@map("health_professionals")
 }
@@ -105,7 +107,8 @@ model Service {
   durationMinutes Int      @default(30)
   createdAt       DateTime @default(now())
 
-  availableTimes AvailableTime[]
+  availableTimes      AvailableTime[]
+  healthProfessionals HealthProfessional[]
 
   @@map("services")
 }

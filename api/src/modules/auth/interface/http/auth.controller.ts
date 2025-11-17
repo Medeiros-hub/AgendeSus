@@ -28,7 +28,6 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    console.log(loginDto);
     const { response: loginResponse, token } =
       await this.loginUseCase.execute(loginDto);
 

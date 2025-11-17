@@ -3,7 +3,9 @@ export type TGetAvailableTimesParams = {
   ubsId?: string;
   serviceId?: string;
   healthProfessionalId?: string;
-  date?: string; // YYYY-MM-DD format
+  date?: string;
+  dateFrom?: string;
+  dateTo?: string;
   page?: number;
   limit?: number;
 };
