@@ -67,6 +67,7 @@ export class JwtConfig {
       httpOnly: true,
       secure: true,
       sameSite: 'none' as const,
+      domain: 'agendesus.onrender.com',
       maxAge: this.parseExpiresIn(this._expiresIn),
     };
   }
