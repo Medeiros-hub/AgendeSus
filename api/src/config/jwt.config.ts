@@ -65,8 +65,8 @@ export class JwtConfig {
     const isProduction = this.configService.get('NODE_ENV') === 'production';
     return {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: 'lax' as const,
+      secure: true,
+      sameSite: 'none' as const,
       maxAge: this.parseExpiresIn(this._expiresIn),
     };
   }
