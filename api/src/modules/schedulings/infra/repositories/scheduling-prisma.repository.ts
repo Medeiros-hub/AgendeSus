@@ -24,6 +24,27 @@ export class SchedulingPrismaRepository implements ISchedulingRepository {
     return scheduling ? this.toDomain(scheduling) : null;
   }
 
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ schedulings: Scheduling[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const [schedulings, total] = await Promise.all([
+      this.prisma.scheduling.findMany({
+        skip,
+        take: limit,
+        orderBy: { scheduledAt: 'desc' },
+      }),
+      this.prisma.scheduling.count(),
+    ]);
+
+    return {
+      schedulings: schedulings.map(this.toDomain),
+      total,
+    };
+  }
+
   async findByUserId(
     userId: string,
     page: number = 1,

@@ -48,7 +48,6 @@ export function useRequestApi<
       setData(response);
       onSuccess && onSuccess(response);
     } catch (error: any) {
-      console.error('useRequestApi error:', error.response);
       if (error.name === 'CanceledError') return error;
 
       const err: IUseRequestApiError = {

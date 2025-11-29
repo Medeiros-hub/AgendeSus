@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export default function HeroSection() {
   return (
-    <section className="w-full bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50 py-20 relative overflow-hidden">
+    <section className="w-full bg-linear-to-br from-slate-100 via-slate-50 to-blue-50 py-20 relative overflow-hidden">
       {/* Diagonal stripes background */}
       <div className="absolute inset-0 opacity-10">
         <div

@@ -5,6 +5,8 @@ import {
   SCHEDULING_REPOSITORY,
 } from '../../domain/repositories/scheduling.repository.interface';
 import { SchedulingStatus } from '@prisma/client';
+import { ReceptionistSchedulingsListResponseDto } from '../dto/receptionist-scheduling-response.dto';
+import { PrismaService } from '../../../../@core/infra/prisma.service';
 
 @Injectable()
 export class FindSchedulingsUseCase
@@ -16,12 +18,13 @@ export class FindSchedulingsUseCase
         status?: SchedulingStatus;
         userId?: string;
       },
-      { schedulings: any[]; total: number }
+      ReceptionistSchedulingsListResponseDto
     >
 {
   constructor(
     @Inject(SCHEDULING_REPOSITORY)
     private readonly schedulingRepository: ISchedulingRepository,
+    private readonly prisma: PrismaService,
   ) {}
 
   async execute(
@@ -31,24 +34,75 @@ export class FindSchedulingsUseCase
       status?: SchedulingStatus;
       userId?: string;
     } = { page: 1, limit: 10 },
-  ) {
+  ): Promise<ReceptionistSchedulingsListResponseDto> {
     const page = input.page ?? 1;
     const limit = input.limit ?? 10;
+    const skip = (page - 1) * limit;
 
+    // Build where clause
+    const where: any = {};
     if (input.userId) {
-      return this.schedulingRepository.findByUserId(input.userId, page, limit);
+      where.userId = input.userId;
     }
-
     if (input.status) {
-      return this.schedulingRepository.findByStatus(input.status, page, limit);
+      where.status = input.status;
     }
 
-    // Se não houver filtro, buscar todos via repository (não existe método genérico findAll — usar findByStatus com undefined não funciona)
-    // Implementação: buscar todos por paginação usando prisma diretamente no repositório caso necessário. Aqui vamos chamar findByStatus com status pendente por padrão.
-    return this.schedulingRepository.findByStatus(
-      'PENDING' as SchedulingStatus,
-      page,
-      limit,
+    // Get total count
+    const total = await this.prisma.scheduling.count({ where });
+
+    // Get raw schedulings with includes from Prisma
+    const rawSchedulings = await this.prisma.scheduling.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { scheduledAt: 'desc' },
+      include: {
+        user: true,
+        availableTime: {
+          include: {
+            service: true,
+            healthProfessional: true,
+            ubs: true,
+          },
+        },
+      },
+    });
+
+    // Calculate metrics
+    const metrics = await this.calculateMetrics();
+
+    return new ReceptionistSchedulingsListResponseDto(
+      rawSchedulings,
+      total,
+      metrics,
     );
+  }
+
+  private async calculateMetrics() {
+    const [scheduled, confirmed, attended, cancelled, total] =
+      await Promise.all([
+        this.prisma.scheduling.count({
+          where: { status: SchedulingStatus.SCHEDULED },
+        }),
+        this.prisma.scheduling.count({
+          where: { status: SchedulingStatus.CONFIRMED },
+        }),
+        this.prisma.scheduling.count({
+          where: { status: SchedulingStatus.ATTENDED },
+        }),
+        this.prisma.scheduling.count({
+          where: { status: SchedulingStatus.CANCELLED },
+        }),
+        this.prisma.scheduling.count(),
+      ]);
+
+    return {
+      total,
+      scheduled,
+      confirmed,
+      attended,
+      cancelled,
+    };
   }
 }

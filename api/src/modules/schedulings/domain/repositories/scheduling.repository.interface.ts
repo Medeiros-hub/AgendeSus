@@ -4,6 +4,10 @@ import { SchedulingStatus } from '@prisma/client';
 export interface ISchedulingRepository {
   create(scheduling: Scheduling): Promise<Scheduling>;
   findById(id: string): Promise<Scheduling | null>;
+  findAll(
+    page: number,
+    limit: number,
+  ): Promise<{ schedulings: Scheduling[]; total: number }>;
   findByUserId(
     userId: string,
     page: number,
