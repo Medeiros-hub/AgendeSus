@@ -32,10 +32,12 @@ export class SearchAvailableTimesUseCase
       serviceId: input.filters.serviceId,
       healthProfessionalId: input.filters.healthProfessionalId,
       dateFrom: input.filters.dateFrom
-        ? new Date(input.filters.dateFrom)
+        ? this.parseUTCDate(input.filters.dateFrom)
         : undefined,
-      dateTo: input.filters.dateTo ? new Date(input.filters.dateTo) : undefined,
-      available: true, // Apenas disponíveis
+      dateTo: input.filters.dateTo
+        ? this.parseUTCDate(input.filters.dateTo)
+        : undefined,
+      available: true,
     };
 
     const { times, total } = await this.availableTimeRepository.findAvailable(
@@ -45,20 +47,37 @@ export class SearchAvailableTimesUseCase
     );
 
     return {
-      times: times.map(
-        (time) =>
-          new AvailableTimeResponseDto({
-            id: time.id,
-            date: time.date,
-            startTime: time.startTime,
-            endTime: time.endTime,
-            available: time.available,
-            healthProfessionalId: time.healthProfessionalId,
-            ubsId: time.ubsId,
-            serviceId: time.serviceId,
-          }),
-      ),
+      times: times.map((time) => {
+        const year = time.date.getUTCFullYear();
+        const month = String(time.date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(time.date.getUTCDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
+        const startHour = String(time.startTime.getUTCHours()).padStart(2, '0');
+        const startMin = String(time.startTime.getUTCMinutes()).padStart(
+          2,
+          '0',
+        );
+        const endHour = String(time.endTime.getUTCHours()).padStart(2, '0');
+        const endMin = String(time.endTime.getUTCMinutes()).padStart(2, '0');
+
+        return new AvailableTimeResponseDto({
+          id: time.id,
+          date: dateStr,
+          startTime: `${startHour}:${startMin}`,
+          endTime: `${endHour}:${endMin}`,
+          available: time.available,
+          healthProfessionalId: time.healthProfessionalId,
+          ubsId: time.ubsId,
+          serviceId: time.serviceId,
+        });
+      }),
       total,
     };
+  }
+
+  private parseUTCDate(dateString: string): Date {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
   }
 }

@@ -33,16 +33,20 @@ export class HealthProfessionalPrismaRepository
   async findAll(
     page: number = 1,
     limit: number = 10,
+    serviceId?: string,
   ): Promise<{ professionals: HealthProfessional[]; total: number }> {
     const skip = (page - 1) * limit;
 
+    const where = serviceId ? { serviceId } : {};
+
     const [professionals, total] = await Promise.all([
       this.prisma.healthProfessional.findMany({
+        where,
         skip,
         take: limit,
         orderBy: { name: 'asc' },
       }),
-      this.prisma.healthProfessional.count(),
+      this.prisma.healthProfessional.count({ where }),
     ]);
 
     return { professionals: professionals.map(this.toDomain), total };
@@ -70,6 +74,7 @@ export class HealthProfessionalPrismaRepository
       specialty: prismaProfessional.specialty,
       crm: prismaProfessional.crm,
       ubsId: prismaProfessional.ubsId,
+      serviceId: prismaProfessional.serviceId ?? undefined,
       createdAt: new Date(),
     });
   }

@@ -6,6 +6,7 @@ export interface HealthProfessionalProps {
   specialty: string;
   crm: string;
   ubsId: string;
+  serviceId?: string;
   createdAt: Date;
 }
 
@@ -33,6 +34,10 @@ export class HealthProfessional extends BaseEntity {
     return this.props.ubsId;
   }
 
+  get serviceId(): string | undefined {
+    return this.props.serviceId;
+  }
+
   toPersistence() {
     return {
       id: this.id,
@@ -40,6 +45,7 @@ export class HealthProfessional extends BaseEntity {
       specialty: this.props.specialty,
       crm: this.props.crm,
       ubsId: this.props.ubsId,
+      serviceId: this.props.serviceId,
     };
   }
 }

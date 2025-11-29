@@ -51,13 +51,16 @@ export class LoginUseCase
     });
 
     const response = new LoginResponseDto({
-      user: {
-        id: user.id,
-        email: user.email.getValue(),
-        fullName: user.fullName,
-        type: user.type,
-      },
-      expiresIn: this.jwtConfig.expiresIn,
+      id: user.id,
+      cpf: user.cpf.getValue(),
+      fullName: user.fullName,
+      birthDate: user.birthDate,
+      phone: user.phone,
+      email: user.email.getValue(),
+      type: user.type,
+      zipcode: user.zipcode,
+      address: user.address,
+      createdAt: user.createdAt,
     });
 
     return { response, token };

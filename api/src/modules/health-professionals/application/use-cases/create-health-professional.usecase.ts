@@ -26,6 +26,7 @@ export class CreateHealthProfessionalUseCase
       specialty: input.specialty,
       crm: input.crm,
       ubsId: input.ubsId,
+      serviceId: input.serviceId,
       createdAt: new Date(),
     });
 

@@ -9,7 +9,7 @@ import {
 export class FindHealthProfessionalsUseCase
   implements
     IUseCase<
-      { page?: number; limit?: number },
+      { page?: number; limit?: number; serviceId?: string },
       { professionals: any[]; total: number }
     >
 {
@@ -19,11 +19,15 @@ export class FindHealthProfessionalsUseCase
   ) {}
 
   async execute(
-    input: { page?: number; limit?: number } = { page: 1, limit: 10 },
+    input: { page?: number; limit?: number; serviceId?: string } = {
+      page: 1,
+      limit: 10,
+    },
   ) {
     const page = input.page ?? 1;
     const limit = input.limit ?? 10;
+    const serviceId = input.serviceId;
 
-    return this.repo.findAll(page, limit);
+    return this.repo.findAll(page, limit, serviceId);
   }
 }

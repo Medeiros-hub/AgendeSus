@@ -1,4 +1,3 @@
-// Create Scheduling
 export type TCreateSchedulingParams = {
   availableTimeId: string;
 };

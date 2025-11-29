@@ -7,6 +7,7 @@ export interface IHealthProfessionalRepository {
   findAll(
     page: number,
     limit: number,
+    serviceId?: string,
   ): Promise<{ professionals: HealthProfessional[]; total: number }>;
   update(professional: HealthProfessional): Promise<HealthProfessional>;
   delete(id: string): Promise<void>;

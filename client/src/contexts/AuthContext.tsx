@@ -12,17 +12,13 @@ import { toast } from 'sonner';
 
 import { api } from '@/lib/api';
 import { auth } from '@/services/internal-api/auth';
+import { TGetUserProfileResponse } from '@/services/internal-api/types/users';
 
-export type User = {
-  id: string;
-  fullName: string;
-  email: string;
-  type: string;
-};
+export type UserState = TGetUserProfileResponse;
 
 interface IAuthContext {
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: UserState | null;
+  setUser: (user: UserState | null) => void;
   isAuthenticated: boolean;
   handleLogin: (
     identifier: string,
@@ -35,7 +31,7 @@ interface IAuthContext {
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserState | null>(null);
   const router = useRouter();
 
   async function handleLogin(
@@ -45,17 +41,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) {
     try {
       const response = await auth.loginUser({ identifier, password });
-
-      const returnedUser = response.user
-        ? {
-            id: response.user.id,
-            fullName: response.user.fullName ?? '',
-            email: response.user.email,
-            type: response.user.type,
-          }
-        : { id: '', fullName: identifier, email: identifier, type: 'patient' };
-
-      setUser(returnedUser);
+      setUser({
+        id: response.id,
+        cpf: response.cpf,
+        fullName: response.fullName,
+        birthDate: response.birthDate,
+        phone: response.phone,
+        email: response.email,
+        type: response.type,
+        zipcode: response.zipcode,
+        address: response.address,
+        createdAt: response.createdAt,
+      });
 
       router.push(redirectTo ?? '/');
     } catch (error: any) {
@@ -83,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   async function getUserLogged(signal?: AbortSignal) {
     try {
       const result = await api.get('/users/logged', { signal });
+
       setUser(result.data);
     } catch (error: any) {
       if (error?.name === 'CanceledError') return;

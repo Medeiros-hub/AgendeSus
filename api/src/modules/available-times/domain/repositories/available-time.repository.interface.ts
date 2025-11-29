@@ -18,6 +18,11 @@ export interface IAvailableTimeRepository {
     page: number,
     limit: number,
   ): Promise<{ times: AvailableTime[]; total: number }>;
+  findConflicts(
+    healthProfessionalId: string,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<AvailableTime[]>;
   update(availableTime: AvailableTime): Promise<AvailableTime>;
   delete(id: string): Promise<void>;
 }
