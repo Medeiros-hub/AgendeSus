@@ -77,3 +77,47 @@ export type TGetUserByIdResponse = {
   address: string;
   createdAt: string;
 };
+
+// List Users
+export type TGetUsersListParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  type?: 'CITIZEN' | 'ADMIN' | 'RECEPTIONIST';
+};
+
+export type TGetUsersListResponse = {
+  users: {
+    id: string;
+    createdAt: string;
+    props: {
+      id: string;
+      cpf: {
+        value: string;
+      };
+      fullName: string;
+      birthDate: string;
+      phone: string;
+      email: {
+        value: string;
+      };
+      type: string;
+      zipcode: string;
+      address: string;
+      createdAt: string;
+    };
+  }[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+// Delete User
+export type TDeleteUserParams = {
+  id: string;
+};
+
+export type TDeleteUserResponse = {
+  message: string;
+};
