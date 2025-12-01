@@ -1,20 +1,26 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Users } from 'lucide-react';
-import { useCallback,useEffect, useState } from 'react';
+import { UserPlus, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { AppointmentsTable } from '@/components/receptionist/AppointmentsTable';
 import { Filters } from '@/components/receptionist/Filters';
 import { MetricsCards } from '@/components/receptionist/MetricsCards';
 import { Pagination } from '@/components/receptionist/Pagination';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { useRequestApi } from '@/hooks/use-request-api';
 import { receptionist } from '@/services/internal-api/receptionist';
+import { EUserType } from '@/services/internal-api/types/auth';
 import { SchedulingStatus } from '@/services/internal-api/types/receptionist';
 
 export default function ReceptionistDashboard() {
+  const router = useRouter();
+  const { user } = useAuthContext();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -136,6 +142,7 @@ export default function ReceptionistDashboard() {
   };
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / limit);
+  const isAdmin = user?.type === EUserType.ADMIN;
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
@@ -146,17 +153,38 @@ export default function ReceptionistDashboard() {
         className="max-w-7xl mx-auto space-y-6"
       >
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-slate-900 rounded-lg">
-            <Users className="h-6 w-6 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-slate-900 rounded-lg">
+              <Users className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">
+                Área do Atendente
+              </h1>
+              <p className="text-slate-600">
+                Gerencie e acompanhe todas as consultas agendadas
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              Área do Atendente
-            </h1>
-            <p className="text-slate-600">
-              Gerencie e acompanhe todas as consultas agendadas
-            </p>
+          <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Button
+                onClick={() => router.push('/admin/users')}
+                variant="outline"
+                className="border-slate-300 text-slate-700 hover:bg-slate-100 flex items-center gap-2"
+              >
+                <Users className="w-4 h-4" />
+                Gerenciar Usuários
+              </Button>
+            )}
+            <Button
+              onClick={() => router.push('/attendant/register-doctor')}
+              className="bg-slate-600 hover:bg-slate-700 text-white flex items-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              Cadastrar Profissional de Saúde
+            </Button>
           </div>
         </div>
 

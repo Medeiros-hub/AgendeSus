@@ -49,7 +49,7 @@ export default function RegisterDoctorPage() {
     {
       onSuccess() {
         toast.success('Médico cadastrado com sucesso!');
-        router.push('/attendant/dashboard');
+        router.push('/receptionist');
       },
       onError(error) {
         toast.error(error.message || 'Erro ao cadastrar médico');
@@ -211,7 +211,7 @@ export default function RegisterDoctorPage() {
                           <SelectContent>
                             {ubsData?.ubsList.map((u) => (
                               <SelectItem key={u.id} value={u.id}>
-                                {u.name}
+                                {u.props.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -350,7 +350,7 @@ export default function RegisterDoctorPage() {
                     type="button"
                     variant="outline"
                     className="flex-1"
-                    onClick={() => router.push('/attendant/dashboard')}
+                    onClick={() => router.push('/receptionist')}
                     disabled={isCreating}
                   >
                     Cancelar

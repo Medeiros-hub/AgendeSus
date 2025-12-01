@@ -4,9 +4,13 @@ import { TInternalApiOptions } from './types/internal-api-options';
 import {
   TCreateUserParams,
   TCreateUserResponse,
+  TDeleteUserParams,
+  TDeleteUserResponse,
   TGetUserByIdParams,
   TGetUserByIdResponse,
   TGetUserProfileResponse,
+  TGetUsersListParams,
+  TGetUsersListResponse,
   TUpdateUserParams,
   TUpdateUserResponse,
 } from './types/users';
@@ -51,6 +55,29 @@ export const users = {
     { signal, headers }: TInternalApiOptions = {},
   ): Promise<TGetUserByIdResponse> {
     const response = await api.get(`/users/${params.id}`, {
+      signal,
+      headers,
+    });
+    return response.data;
+  },
+
+  async getUsersList(
+    params: TGetUsersListParams = {},
+    { signal, headers }: TInternalApiOptions = {},
+  ): Promise<TGetUsersListResponse> {
+    const response = await api.get('/users', {
+      params,
+      signal,
+      headers,
+    });
+    return response.data;
+  },
+
+  async deleteUser(
+    params: TDeleteUserParams,
+    { signal, headers }: TInternalApiOptions = {},
+  ): Promise<TDeleteUserResponse> {
+    const response = await api.delete(`/users/${params.id}`, {
       signal,
       headers,
     });

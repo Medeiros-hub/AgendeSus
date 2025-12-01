@@ -8,6 +8,8 @@ export interface IUserRepository {
   findAll(
     page: number,
     limit: number,
+    search?: string,
+    type?: string,
   ): Promise<{ users: Omit<User, 'password'>[]; total: number }>;
   update(user: User): Promise<User>;
   delete(id: string): Promise<void>;

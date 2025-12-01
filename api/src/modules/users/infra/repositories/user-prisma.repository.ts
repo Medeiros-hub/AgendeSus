@@ -34,11 +34,28 @@ export class UserPrismaRepository implements IUserRepository {
   async findAll(
     page: number = 1,
     limit: number = 10,
+    search?: string,
+    type?: string,
   ): Promise<{ users: User[]; total: number }> {
     const skip = (page - 1) * limit;
 
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { fullName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { cpf: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (type) {
+      where.type = type;
+    }
+
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
+        where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -55,7 +72,7 @@ export class UserPrismaRepository implements IUserRepository {
           createdAt: true,
         },
       }),
-      this.prisma.user.count(),
+      this.prisma.user.count({ where }),
     ]);
 
     return {

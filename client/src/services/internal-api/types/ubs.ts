@@ -7,11 +7,15 @@ export type TGetUBSListParams = {
 export type TGetUBSListResponse = {
   ubsList: {
     id: string;
-    name: string;
-    cep: string;
-    address: string;
-    phone: string;
     createdAt: string;
+    props: {
+      id: string;
+      name: string;
+      cep: string;
+      address: string;
+      phone: string;
+      createdAt: string;
+    };
   }[];
   total: number;
 };
