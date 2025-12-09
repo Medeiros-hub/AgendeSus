@@ -23,11 +23,12 @@ export const receptionist = {
 
   async confirmScheduling(
     id: string,
+    confirmCode: string,
     { signal, headers }: TInternalApiOptions = {},
   ): Promise<TUpdateSchedulingStatusResponse> {
     const response = await api.patch(
       `/schedulings/${id}/confirm`,
-      {},
+      { confirmCode },
       {
         signal,
         headers,

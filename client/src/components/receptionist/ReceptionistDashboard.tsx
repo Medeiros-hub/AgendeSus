@@ -17,6 +17,7 @@ import { useRequestApi } from '@/hooks/use-request-api';
 import { receptionist } from '@/services/internal-api/receptionist';
 import { EUserType } from '@/services/internal-api/types/auth';
 import { SchedulingStatus } from '@/services/internal-api/types/receptionist';
+import { getErrorMessage } from '@/utils/error-handler';
 
 export default function ReceptionistDashboard() {
   const router = useRouter();
@@ -43,24 +44,6 @@ export default function ReceptionistDashboard() {
     isLoading,
   } = useRequestApi(receptionist.getAllSchedulings);
 
-  const { handler: confirmHandler } = useRequestApi(
-    receptionist.confirmScheduling,
-    {
-      onSuccess: () => {
-        toast.success('Consulta confirmada com sucesso!');
-        fetchSchedulings({
-          page,
-          limit,
-          ...(debouncedSearch ? { search: debouncedSearch } : {}),
-          ...(status !== 'ALL' ? { status } : {}),
-        });
-      },
-      onError: (error) => {
-        toast.error(error.message || 'Erro ao confirmar consulta');
-      },
-    },
-  );
-
   const { handler: completeHandler } = useRequestApi(
     receptionist.completeScheduling,
     {
@@ -74,7 +57,8 @@ export default function ReceptionistDashboard() {
         });
       },
       onError: (error) => {
-        toast.error(error.message || 'Erro ao concluir consulta');
+        const errorMessage = getErrorMessage(error);
+        toast.error(errorMessage);
       },
     },
   );
@@ -92,7 +76,8 @@ export default function ReceptionistDashboard() {
         });
       },
       onError: (error) => {
-        toast.error(error.message || 'Erro ao cancelar consulta');
+        const errorMessage = getErrorMessage(error);
+        toast.error(errorMessage);
       },
     },
   );
@@ -107,8 +92,21 @@ export default function ReceptionistDashboard() {
     });
   }, [page, debouncedSearch, status]);
 
-  const handleConfirm = async (id: string) => {
-    await confirmHandler(id);
+  const handleConfirm = async (id: string, confirmCode: string) => {
+    try {
+      await receptionist.confirmScheduling(id, confirmCode);
+      toast.success('Consulta confirmada com sucesso!');
+      fetchSchedulings({
+        page,
+        limit,
+        ...(debouncedSearch ? { search: debouncedSearch } : {}),
+        ...(status !== 'ALL' ? { status } : {}),
+      });
+    } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      toast.error(errorMessage);
+      throw error; // Re-throw para o modal mostrar o erro
+    }
   };
 
   const handleComplete = async (id: string) => {

@@ -1,9 +1,15 @@
 'use client';
 
+import {
+  Calendar,
+  LayoutDashboard,
+  LogOut,
+  UserCircle,
+  Users,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, LogOut, UserCircle, Users } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -55,6 +61,15 @@ export default function Header({ variant = 'default' }: HeaderProps) {
           {/* Navigation for authenticated users */}
           {isAuthenticated && !isAtendente && (
             <nav className="flex items-center gap-2 mr-4">
+              <Link href="/my-schedulings">
+                <Button
+                  variant="ghost"
+                  className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Meus Agendamentos
+                </Button>
+              </Link>
               {canAccessReceptionist && (
                 <Link href="/receptionist">
                   <Button

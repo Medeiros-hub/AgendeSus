@@ -6,6 +6,7 @@ import { ConfirmSchedulingUseCase } from './application/use-cases/confirm-schedu
 import { CancelSchedulingUseCase } from './application/use-cases/cancel-scheduling.usecase';
 import { FindSchedulingsUseCase } from './application/use-cases/find-schedulings.usecase';
 import { DeleteSchedulingUseCase } from './application/use-cases/delete-scheduling.usecase';
+import { CompleteSchedulingUseCase } from './application/use-cases/complete-scheduling.usecase';
 import { SchedulingPrismaRepository } from './infra/repositories/scheduling-prisma.repository';
 import { SCHEDULING_REPOSITORY } from './domain/repositories/scheduling.repository.interface';
 import { AvailableTimesModule } from '../available-times/available-times.module';
@@ -17,6 +18,7 @@ import { AvailableTimesModule } from '../available-times/available-times.module'
     CreateSchedulingUseCase,
     ConfirmSchedulingUseCase,
     CancelSchedulingUseCase,
+    CompleteSchedulingUseCase,
     FindSchedulingsUseCase,
     DeleteSchedulingUseCase,
     {

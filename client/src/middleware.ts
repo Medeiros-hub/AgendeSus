@@ -36,6 +36,10 @@ const protectedRoutes = [
     path: '/admin/users',
     allowedRoles: ['ADMIN'],
   },
+  {
+    path: '/my-schedulings',
+    allowedRoles: ['ADMIN', 'RECEPTIONIST', 'CITIZEN'],
+  },
 ] as const;
 
 const REDIRECT_WHEN_NOT_AUTHENTICATED_TO = '/auth/sign-in';

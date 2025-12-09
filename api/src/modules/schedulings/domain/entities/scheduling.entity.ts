@@ -45,12 +45,22 @@ export class Scheduling extends BaseEntity {
    */
   confirm(code: string): void {
     if (this.props.confirmCode !== code) {
-      throw new BusinessRuleException('Código de confirmação inválido');
+      throw new BusinessRuleException(
+        'Código de confirmação inválido. Por favor, verifique o código fornecido pelo paciente e tente novamente.',
+      );
     }
 
     if (this.props.status !== SchedulingStatus.SCHEDULED) {
+      const statusMap = {
+        CONFIRMED: 'já foi confirmado',
+        CANCELLED: 'foi cancelado',
+        ATTENDED: 'já foi atendido',
+        MISSED: 'foi marcado como ausente',
+      };
+      const statusText =
+        statusMap[this.props.status] || 'não pode ser confirmado';
       throw new BusinessRuleException(
-        'Apenas agendamentos pendentes podem ser confirmados',
+        `Este agendamento ${statusText}. Apenas agendamentos pendentes podem ser confirmados.`,
       );
     }
 
@@ -66,12 +76,14 @@ export class Scheduling extends BaseEntity {
       this.props.status === SchedulingStatus.MISSED
     ) {
       throw new BusinessRuleException(
-        'Não é possível cancelar um agendamento já finalizado',
+        'Não é possível cancelar um agendamento que já foi finalizado (atendido ou ausente).',
       );
     }
 
     if (this.props.status === SchedulingStatus.CANCELLED) {
-      throw new BusinessRuleException('Agendamento já está cancelado');
+      throw new BusinessRuleException(
+        'Este agendamento já foi cancelado anteriormente.',
+      );
     }
 
     // Valida se não está próximo demais do horário
@@ -79,9 +91,9 @@ export class Scheduling extends BaseEntity {
     const hoursDiff =
       (this.props.scheduledAt.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-    if (hoursDiff < 2) {
+    if (hoursDiff < 2 && hoursDiff > 0) {
       throw new BusinessRuleException(
-        'Não é possível cancelar com menos de 2 horas de antecedência',
+        `Não é possível cancelar com menos de 2 horas de antecedência. Faltam ${Math.round(hoursDiff * 60)} minutos para o horário agendado.`,
       );
     }
 
@@ -96,8 +108,14 @@ export class Scheduling extends BaseEntity {
       this.props.status !== SchedulingStatus.CONFIRMED &&
       this.props.status !== SchedulingStatus.SCHEDULED
     ) {
+      const statusMap = {
+        CANCELLED: 'cancelado',
+        ATTENDED: 'já atendido',
+        MISSED: 'marcado como ausente',
+      };
+      const statusText = statusMap[this.props.status] || 'com status inválido';
       throw new BusinessRuleException(
-        'Apenas agendamentos confirmados podem ser marcados como atendidos',
+        `Não é possível concluir um agendamento ${statusText}. Apenas agendamentos confirmados ou agendados podem ser marcados como atendidos.`,
       );
     }
 
