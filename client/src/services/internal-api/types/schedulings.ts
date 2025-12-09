@@ -48,15 +48,50 @@ export type TGetUserSchedulingsParams = {
   limit?: number;
 };
 
-export type TGetUserSchedulingsResponse = {
-  schedulings: {
+export type TSchedulingStatus =
+  | 'SCHEDULED'
+  | 'CONFIRMED'
+  | 'CANCELLED'
+  | 'ATTENDED'
+  | 'MISSED';
+
+export type TUserScheduling = {
+  id: string;
+  patient: {
     id: string;
-    availableTimeId: string;
-    userId: string;
-    status: 'SCHEDULED' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED' | 'MISSED';
-    scheduledAt: string;
-    confirmCode: string;
-    createdAt: string;
-  }[];
+    fullName: string;
+    cpf: string;
+    phone: string;
+  };
+  service: {
+    id: string;
+    name: string;
+  };
+  healthProfessional: {
+    id: string;
+    name: string;
+    specialty: string;
+  };
+  ubs: {
+    id: string;
+    name: string;
+  };
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: TSchedulingStatus;
+  confirmCode: string;
+  scheduledAt: string;
+};
+
+export type TGetUserSchedulingsResponse = {
+  schedulings: TUserScheduling[];
   total: number;
+  metrics: {
+    total: number;
+    scheduled: number;
+    confirmed: number;
+    attended: number;
+    cancelled: number;
+  };
 };

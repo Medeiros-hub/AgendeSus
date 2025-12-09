@@ -70,7 +70,7 @@ export class FindSchedulingsUseCase
     });
 
     // Calculate metrics
-    const metrics = await this.calculateMetrics();
+    const metrics = await this.calculateMetrics(input.userId);
 
     return new ReceptionistSchedulingsListResponseDto(
       rawSchedulings,
@@ -79,22 +79,24 @@ export class FindSchedulingsUseCase
     );
   }
 
-  private async calculateMetrics() {
+  private async calculateMetrics(userId?: string) {
+    const where: any = userId ? { userId } : {};
+
     const [scheduled, confirmed, attended, cancelled, total] =
       await Promise.all([
         this.prisma.scheduling.count({
-          where: { status: SchedulingStatus.SCHEDULED },
+          where: { ...where, status: SchedulingStatus.SCHEDULED },
         }),
         this.prisma.scheduling.count({
-          where: { status: SchedulingStatus.CONFIRMED },
+          where: { ...where, status: SchedulingStatus.CONFIRMED },
         }),
         this.prisma.scheduling.count({
-          where: { status: SchedulingStatus.ATTENDED },
+          where: { ...where, status: SchedulingStatus.ATTENDED },
         }),
         this.prisma.scheduling.count({
-          where: { status: SchedulingStatus.CANCELLED },
+          where: { ...where, status: SchedulingStatus.CANCELLED },
         }),
-        this.prisma.scheduling.count(),
+        this.prisma.scheduling.count({ where }),
       ]);
 
     return {

@@ -1,4 +1,4 @@
-import { CheckCircle2, ClipboardCheck, Loader2,XCircle } from 'lucide-react';
+import { CheckCircle2, ClipboardCheck, Loader2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 import {
@@ -22,12 +22,13 @@ import {
 } from '@/components/ui/table';
 import { TReceptionistScheduling } from '@/services/internal-api/types/receptionist';
 
+import { ConfirmSchedulingModal } from './ConfirmSchedulingModal';
 import { StatusBadge } from './StatusBadge';
 
 interface AppointmentsTableProps {
   schedulings: TReceptionistScheduling[];
   isLoading: boolean;
-  onConfirm: (id: string) => Promise<void>;
+  onConfirm: (id: string, confirmCode: string) => Promise<void>;
   onComplete: (id: string) => Promise<void>;
   onCancel: (id: string) => Promise<void>;
 }
@@ -44,6 +45,10 @@ export function AppointmentsTable({
     open: boolean;
     schedulingId: string | null;
   }>({ open: false, schedulingId: null });
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    scheduling: TReceptionistScheduling | null;
+  }>({ open: false, scheduling: null });
 
   const handleAction = async (
     id: string,
@@ -54,6 +59,22 @@ export function AppointmentsTable({
       await action(id);
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleConfirmClick = (scheduling: TReceptionistScheduling) => {
+    setConfirmModal({ open: true, scheduling });
+  };
+
+  const handleConfirmWithCode = async (confirmCode: string) => {
+    if (confirmModal.scheduling) {
+      setActionLoading(confirmModal.scheduling.id);
+      try {
+        await onConfirm(confirmModal.scheduling.id, confirmCode);
+        setConfirmModal({ open: false, scheduling: null });
+      } finally {
+        setActionLoading(null);
+      }
     }
   };
 
@@ -185,9 +206,7 @@ export function AppointmentsTable({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() =>
-                              handleAction(scheduling.id, onConfirm)
-                            }
+                            onClick={() => handleConfirmClick(scheduling)}
                             disabled={isProcessing}
                             className="bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 border-blue-200"
                           >
@@ -272,6 +291,23 @@ export function AppointmentsTable({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {confirmModal.scheduling && (
+        <ConfirmSchedulingModal
+          isOpen={confirmModal.open}
+          onClose={() => setConfirmModal({ open: false, scheduling: null })}
+          onConfirm={handleConfirmWithCode}
+          schedulingInfo={{
+            patientName: confirmModal.scheduling.patient.fullName,
+            service: confirmModal.scheduling.service.name,
+            professional: confirmModal.scheduling.healthProfessional.name,
+            dateTime: formatDateTime(
+              confirmModal.scheduling.date,
+              confirmModal.scheduling.startTime,
+            ),
+          }}
+        />
+      )}
     </>
   );
 }
